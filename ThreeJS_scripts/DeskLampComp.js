@@ -25,8 +25,8 @@ import { RoomEnvironment } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/exam
 // Create scene, camera, and renderer
 
 //Camera
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 8);
+let camera = new THREE.PerspectiveCamera(47, 922 / 640, 0.1, 1000);
+camera.position.set(-2, 1, 8);
 
 //renderer
 /*let renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -51,6 +51,7 @@ container.appendChild(renderer.domElement);
 
 //Scene
 let scene = new THREE.Scene();
+
 
 // Set up post-processing for bloom effect
 const composer = new EffectComposer(renderer);
@@ -128,8 +129,13 @@ loader.load('https://RolandThsive.github.io/3D_models/DeskLampComp.glb', (gltf) 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enablePan = true;
-controls.maxDistance = 8;  // Maximum zoom-out distance
+controls.maxDistance = 12;  // Maximum zoom-out distance
 controls.minDistance = 4;   // Minimum zoom-in distance
+
+
+// On load the view offset is controlled here
+scene.rotation.y = -Math.PI / 2.0;  // 45 degrees in radians (Math.PI / 4)
+controls.target.set(-0.5, 0.3, 0);  // Pans the scene to the left visually
 
 // Animation loop
 function animate() {
