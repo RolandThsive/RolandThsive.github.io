@@ -58,7 +58,7 @@ const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 
-const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(container.clientWidth, container.clientHeight), 1.5, 0.4, 0.85);
 bloomPass.threshold = 0.1;
 bloomPass.strength = 1.0; // Adjust bloom intensity
 bloomPass.radius = 2;
@@ -148,8 +148,8 @@ animate();
 
 // Handle window resize
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = container.clientWidth / container.clientHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight); // Update composer size
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    composer.setSize(container.clientWidth, container.clientHeight); // Update composer size
 });
