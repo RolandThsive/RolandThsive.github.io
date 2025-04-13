@@ -1,15 +1,3 @@
-/*import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { LightProbeGenerator } from 'three/addons/lights/LightProbeGenerator.js';
-import { LightProbeHelper } from 'three/addons/helpers/LightProbeHelper.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';*/
-
-
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/controls/OrbitControls.js';
@@ -21,132 +9,141 @@ import { LightProbeGenerator } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/
 import { LightProbeHelper } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/helpers/LightProbeHelper.js';
 import { RoomEnvironment } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/environments/RoomEnvironment.js';
 
+let camera, scene, renderer, composer, controls;
+let isAnimating = false;
 
-// Create scene, camera, and renderer
-//renderer
-/*let renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
-renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);*/
+function initScene() {
+    const container = document.getElementById('JSThreeModel');
+    if (!container || getComputedStyle(container).display === 'none') return;
 
+    // Prevent duplicate canvas
+    if (container.querySelector('canvas')) {
+        console.log("Canvas already exists, skipping init.");
+        return;
+    }
 
-//Renderer
-const container = document.getElementById('JSThreeModel');
-let renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(container.clientWidth, container.clientHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
-renderer.shadowMap.enabled = true;
-container.appendChild(renderer.domElement);
+    // Renderer
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
 
+    // Camera
+    camera = new THREE.PerspectiveCamera(47, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(-2, 1, 8);
 
-//Camera
-let camera = new THREE.PerspectiveCamera(47, container.clientWidth / container.clientHeight, 0.1, 1000);
-camera.position.set(-2, 1, 8);
+    // Scene
+    scene = new THREE.Scene();
 
-//Scene
-let scene = new THREE.Scene();
-// Set up post-processing for bloom effect
-const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, camera);
-composer.addPass(renderPass);
+    // Composer (Bloom)
+    composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(container.clientWidth, container.clientHeight),
+        1.5, 0.4, 0.85
+    );
+    bloomPass.threshold = 0.1;
+    bloomPass.strength = 1.0;
+    bloomPass.radius = 2;
+    composer.addPass(bloomPass);
 
-const bloomPass = new UnrealBloomPass(new THREE.Vector2(container.clientWidth, container.clientHeight), 1.5, 0.4, 0.85);
-bloomPass.threshold = 0.1;
-bloomPass.strength = 1.0; // Adjust bloom intensity
-bloomPass.radius = 2;
-composer.addPass(bloomPass);
+    // Floor and wall
+    const geoFloor = new THREE.BoxGeometry(2000, 0.1, 2000);
+    const matFloor = new THREE.MeshStandardMaterial({ color: 0xfffff0, roughness: 0.4, metalness: 0 });
+    const floor = new THREE.Mesh(geoFloor, matFloor);
+    floor.position.y = -9;
+    scene.add(floor);
 
-// probe
-let lightProbe;
-lightProbe = new THREE.LightProbe();
-scene.add(lightProbe);
+    const geoWall = new THREE.BoxGeometry(0.1, 2000, 2000);
+    const matWall = new THREE.MeshStandardMaterial({ color: 0xfffff0, roughness: 0.4, metalness: 0 });
+    const wall = new THREE.Mesh(geoWall, matWall);
+    wall.position.x = -9;
+    scene.add(wall);
 
-//Create a Floor
-const geoFloor = new THREE.BoxGeometry(2000, 0.1, 2000);
-const matStdFloor = new THREE.MeshStandardMaterial({
-    color: 0xFFFFF0, roughness: 0.4, metalness: 0
-});
-const mshStdFloor = new THREE.Mesh(geoFloor, matStdFloor);
-mshStdFloor.position.set(0, -9, 0);
-scene.add(mshStdFloor);
+    // Light Probe
+    const lightProbe = new THREE.LightProbe();
+    scene.add(lightProbe);
 
-//backwards wall
-const geoWall = new THREE.BoxGeometry(0.1, 2000, 2000);
-const matStdWall = new THREE.MeshStandardMaterial({
-    color: 0xFFFFF0, roughness: 0.4, metalness: 0
-});
-const mshStdWall = new THREE.Mesh(geoWall, matStdWall);
-mshStdWall.position.set(-9, 0, 0);
-scene.add(mshStdWall);
+    // Controls
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = true;
+    controls.maxDistance = 12;
+    controls.minDistance = 4;
+    scene.rotation.y = -Math.PI / 2.0;
+    controls.target.set(-0.5, 0.3, 0);
 
-// Load GLTF model
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/libs/draco/gltf/');
-const loader = new GLTFLoader();
-loader.setDRACOLoader(dracoLoader);
+    // Model
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/libs/draco/gltf/');
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
 
-loader.load('https://RolandThsive.github.io/3D_models/DeskLampComp.glb', (gltf) => {
-    const model = gltf.scene;
-    scene.add(model);
-
-    // Find the material named "mat_B2" and add a point light to its position
-
-    model.traverse((object) => {
-        if (object.isMesh && object.material.name === 'Mat_B2') {
-            object.material.emissive = new THREE.Color(0xFF0005); // Red glow
-            object.material.emissiveIntensity = 1.0; // Adjust intensity
-        }
-        if (object.isMesh && object.material.name === 'Mat_B1') {
-            object.material.emissive = new THREE.Color(0x00FF00); // Green glow
-            object.material.emissiveIntensity = 1.0; // Adjust intensity
-        }
+    loader.load('https://RolandThsive.github.io/3D_models/DeskLampComp.glb', (gltf) => {
+        const model = gltf.scene;
+        scene.add(model);
+        model.traverse((obj) => {
+            if (obj.isMesh) {
+                if (obj.material.name === 'Mat_B2') {
+                    obj.material.emissive = new THREE.Color(0xFF0005);
+                    obj.material.emissiveIntensity = 1.0;
+                    const pointLight = new THREE.PointLight(0xFF0005, 1.5, 50, 0.7);
+                    pointLight.position.copy(obj.position);
+                    scene.add(pointLight);
+                }
+                if (obj.material.name === 'Mat_B1') {
+                    obj.material.emissive = new THREE.Color(0x00FF00);
+                    obj.material.emissiveIntensity = 1.0;
+                    const pointLight = new THREE.PointLight(0x00FF00, 1.5, 50, 0.7);
+                    pointLight.position.copy(obj.position);
+                    scene.add(pointLight);
+                }
+            }
+        });
     });
-    model.traverse((object) => {
-        if (object.isMesh && object.material.name === 'Mat_B2') {
-            const pointLight = new THREE.PointLight(0xFF0005, 1.5, 50, 0.7);
-            pointLight.position.copy(object.position);
-            scene.add(pointLight);
-        }
-        if (object.isMesh && object.material.name === 'Mat_B1') {
-            const pointLight = new THREE.PointLight(0x00FF00, 1.5, 50, 0.7);
-            pointLight.position.copy(object.position);
-            scene.add(pointLight);
-        }
-    });
-}, undefined, (error) => {
-    console.error('Error loading GLTF model:', error);
-});
 
-// Add controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.enablePan = true;
-controls.maxDistance = 12;  // Maximum zoom-out distance
-controls.minDistance = 4;   // Minimum zoom-in distance
+    // Resize Handler
+    window.addEventListener('resize', onResize);
 
+    function onResize() {
+        if (!container || getComputedStyle(container).display === 'none') return;
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        composer.setSize(container.clientWidth, container.clientHeight);
+    }
 
-// On load the view offset is controlled here
-scene.rotation.y = -Math.PI / 2.0;  // 45 degrees in radians (Math.PI / 4)
-controls.target.set(-0.5, 0.3, 0);  // Pans the scene to the left visually
+    // Animation Loop
+    if (!isAnimating) {
+        isAnimating = true;
+        animate();
+    }
+}
 
-// Animation loop
 function animate() {
+    if (!isAnimating) return;
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
-    composer.render(); // Use composer to apply the bloom effect
+    composer.render();
 }
-animate();
 
-// Handle window resize
-window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    composer.setSize(container.clientWidth, container.clientHeight); // Update composer size
+// Trigger when visible
+const observer = new MutationObserver(() => {
+    const container = document.getElementById('JSThreeModel');
+    if (container && getComputedStyle(container).display !== 'none') {
+        initScene();
+    }
+});
+observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+
+// Also manually call once on load
+window.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('JSThreeModel');
+    if (container && getComputedStyle(container).display !== 'none') {
+        initScene();
+    }
 });
