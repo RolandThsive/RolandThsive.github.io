@@ -23,11 +23,6 @@ import { RoomEnvironment } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/exam
 
 
 // Create scene, camera, and renderer
-
-//Camera
-let camera = new THREE.PerspectiveCamera(47, 922 / 640, 0.1, 1000);
-camera.position.set(-2, 1, 8);
-
 //renderer
 /*let renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -49,10 +44,12 @@ renderer.shadowMap.enabled = true;
 container.appendChild(renderer.domElement);
 
 
+//Camera
+let camera = new THREE.PerspectiveCamera(47, container.clientWidth / container.clientHeight, 0.1, 1000);
+camera.position.set(-2, 1, 8);
+
 //Scene
 let scene = new THREE.Scene();
-
-
 // Set up post-processing for bloom effect
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
