@@ -32,8 +32,8 @@ function initScene() {
     container.appendChild(renderer.domElement);
 
     // Camera
-    camera = new THREE.PerspectiveCamera(47, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(-2, 1, 8);
+    camera = new THREE.PerspectiveCamera(38, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(-7, 1, 8);
 
     // Scene
     scene = new THREE.Scene();
@@ -74,7 +74,7 @@ function initScene() {
     controls.maxDistance = 12;
     controls.minDistance = 4;
     scene.rotation.y = -Math.PI / 2.0;
-    controls.target.set(-0.5, 0.3, 0);
+    controls.target.set(-0.5, 0.6, 0);
 
     // Model
     const dracoLoader = new DRACOLoader();
