@@ -11,6 +11,8 @@ import { RoomEnvironment } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/exam
 
 let camera, scene, renderer, composer, controls;
 let isAnimating = false;
+let matB2 = null, pointLight2 = null;
+let matB1 = null, pointLight1 = null;
 
 function initScene() {
     const container = document.getElementById('JSThreeModel');
@@ -54,13 +56,13 @@ function initScene() {
     const geoFloor = new THREE.BoxGeometry(2000, 0.1, 2000);
     const matFloor = new THREE.MeshStandardMaterial({ color: 0xfffff0, roughness: 0.4, metalness: 0 });
     const floor = new THREE.Mesh(geoFloor, matFloor);
-    floor.position.y = -9;
+    floor.position.y = -11;
     scene.add(floor);
 
     const geoWall = new THREE.BoxGeometry(0.1, 2000, 2000);
     const matWall = new THREE.MeshStandardMaterial({ color: 0xfffff0, roughness: 0.4, metalness: 0 });
     const wall = new THREE.Mesh(geoWall, matWall);
-    wall.position.x = -9;
+    wall.position.x = -11;
     scene.add(wall);
 
     // Light Probe
@@ -88,21 +90,26 @@ function initScene() {
         model.traverse((obj) => {
             if (obj.isMesh) {
                 if (obj.material.name === 'Mat_B2') {
-                    obj.material.emissive = new THREE.Color(0xFF0005);
-                    obj.material.emissiveIntensity = 1.0;
-                    const pointLight = new THREE.PointLight(0xFF0005, 1.5, 50, 0.7);
-                    pointLight.position.copy(obj.position);
-                    scene.add(pointLight);
+                    matB2 = obj.material; // Save reference
+                    matB2.color = new THREE.Color(0xF5F5F5);
+                    matB2.emissive = new THREE.Color(0xFF0005);
+                    matB2.emissiveIntensity = 1.0;
+                    pointLight2 = new THREE.PointLight(0xFF0005, 1.5, 50, 0.7);
+                    pointLight2.position.copy(obj.position);
+                    scene.add(pointLight2);
                 }
                 if (obj.material.name === 'Mat_B1') {
-                    obj.material.emissive = new THREE.Color(0x00FF00);
-                    obj.material.emissiveIntensity = 1.0;
-                    const pointLight = new THREE.PointLight(0x00FF00, 1.5, 50, 0.7);
-                    pointLight.position.copy(obj.position);
-                    scene.add(pointLight);
+                    matB1 = obj.material; // Save reference
+                    matB1.color = new THREE.Color(0xF5F5F5);
+                    matB1.emissive = new THREE.Color(0x00FF00);
+                    matB1.emissiveIntensity = 1.0;
+                    pointLight1 = new THREE.PointLight(0x00FF00, 1.5, 50, 0.7);
+                    pointLight1.position.copy(obj.position);
+                    scene.add(pointLight1);
                 }
             }
         });
+        setupColorInputs(); // Call after model is loaded
     });
 
     // Resize Handler
@@ -129,6 +136,139 @@ function animate() {
     controls.update();
     renderer.render(scene, camera);
     composer.render();
+}
+
+function getKelvinColorInfo(value) {
+    const stops = [
+        { stop: 0, color: "#FFDAB3", kelvin: 2700 },   // Soft White
+        { stop: 40, color: "#F2E6D8", kelvin: 4000 },  // Warm White
+        { stop: 100, color: "#F5F5F5", kelvin: 5000 }  // Neutral White
+    ];
+
+    let lower, upper;
+    for (let i = 0; i < stops.length - 1; i++) {
+        if (value >= stops[i].stop && value <= stops[i + 1].stop) {
+            lower = stops[i];
+            upper = stops[i + 1];
+            break;
+        }
+    }
+
+    const t = (value - lower.stop) / (upper.stop - lower.stop);
+
+    const hexToRgb = hex => {
+        const n = parseInt(hex.replace("#", ""), 16);
+        return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    };
+
+    const rgbToHex = ({ r, g, b }) =>
+        "#" + [r, g, b].map(x => x.toString(16).padStart(2, "0")).join("");
+
+    const interpolate = (a, b, t) => ({
+        r: Math.round(a.r + (b.r - a.r) * t),
+        g: Math.round(a.g + (b.g - a.g) * t),
+        b: Math.round(a.b + (b.b - a.b) * t)
+    });
+
+    const color = interpolate(hexToRgb(lower.color), hexToRgb(upper.color), t);
+    const kelvin = Math.round(lower.kelvin + (upper.kelvin - lower.kelvin) * t);
+
+    return {
+        hex: rgbToHex(color),
+        kelvin: kelvin
+    };
+}
+
+function setupColorInputs() {
+    const inputB2 = document.getElementById('colorPicker2');
+    const inputB1 = document.getElementById('colorPicker1');
+    const intensityB2 = document.getElementById('brightnessSlider2');
+    const intensityB1 = document.getElementById('brightnessSlider1');
+    const slider2 = document.getElementById("ILCSlider2");
+    const slider1 = document.getElementById("ILCSlider1");
+
+    if (inputB2) {
+        inputB2.addEventListener('input', () => {
+            if (matB2) {
+                const color = new THREE.Color(inputB2.value);
+                matB2.emissive.set(color);
+                if (pointLight2) pointLight2.color.set(color);
+            }
+        });
+    }
+
+    if (inputB1) {
+        inputB1.addEventListener('input', () => {
+            if (matB1) {
+                const color = new THREE.Color(inputB1.value);
+                matB1.emissive.set(color);
+                if (pointLight1) pointLight1.color.set(color);
+            }
+        });
+    }
+
+    if (intensityB2) {
+        intensityB2.addEventListener('input', () => {
+            if (pointLight2) pointLight2.intensity = parseFloat(intensityB2.value);
+            if (matB2) matB2.emissiveIntensity = parseFloat(intensityB2.value);
+        });
+    }
+
+    if (intensityB1) {
+        intensityB1.addEventListener('input', () => {
+            if (pointLight1) pointLight1.intensity = parseFloat(intensityB1.value);
+            if (matB1) matB1.emissiveIntensity = parseFloat(intensityB1.value);
+        });
+    }
+    if (slider2) {
+        slider2.addEventListener("input", () => {
+            if (matB2) {
+                const { hex, kelvin } = getKelvinColorInfo(+slider2.value);
+                const color = new THREE.Color(hex);
+                matB2.emissive.set(color);
+                if (pointLight2) pointLight2.color.set(color);
+            }
+        });
+    }
+    if (slider1) {
+        slider1.addEventListener("input", () => {
+            if (matB1) {
+                const { hex, kelvin } = getKelvinColorInfo(+slider1.value);
+                const color = new THREE.Color(hex);
+                matB1.emissive.set(color);
+                if (pointLight1) pointLight1.color.set(color);
+            }
+        });
+    }
+}
+
+function changeDropdownText(event, text) {
+    event.preventDefault(); // Prevent default link behavior
+    document.getElementById('dropdownText').innerText = text; // Update button text
+    document.querySelector('.dropdown').classList.remove('open'); // Close dropdown
+
+    const inputB2 = document.getElementById('colorPicker2');
+    const inputB1 = document.getElementById('colorPicker1');
+
+    const slider2 = document.getElementById("ILCSlider2");
+    const slider1 = document.getElementById("ILCSlider1");
+
+    if (text == "R.G.B. Light Configuration") {
+        const color2 = new THREE.Color(inputB2.value);
+        matB2.emissive.set(color2);
+        if (pointLight2) { pointLight2.color.set(color2); }
+        const color1 = new THREE.Color(inputB1.value);
+        matB1.emissive.set(color1);
+        if (pointLight1) pointLight1.color.set(color1);
+    }
+    else if (text == "Incandescent Light Configuration") {
+        const { hex2, kelvin2 } = getKelvinColorInfo(+slider2.value);
+        const color2 = new THREE.Color(hex2);
+        const { hex1, kelvin1 } = getKelvinColorInfo(+slider1.value);
+        const color1 = new THREE.Color(hex1);
+        matB2.emissive.set(color2);
+        matB1.emissive.set(color1);
+    }
 }
 
 // Trigger when visible
