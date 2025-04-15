@@ -13,6 +13,8 @@ let camera, scene, renderer, composer, controls;
 let isAnimating = false;
 let matB2 = null, pointLight2 = null;
 let matB1 = null, pointLight1 = null;
+let selectedMode = "3D Model Viewer";
+
 
 function initScene() {
     const container = document.getElementById('JSThreeModel');
@@ -242,10 +244,7 @@ function setupColorInputs() {
     }
 }
 
-function changeDropdownText(event, text) {
-    event.preventDefault(); // Prevent default link behavior
-    document.getElementById('dropdownText').innerText = text; // Update button text
-    document.querySelector('.dropdown').classList.remove('open'); // Close dropdown
+function changeBulbMode() {
 
     const inputB2 = document.getElementById('colorPicker2');
     const inputB1 = document.getElementById('colorPicker1');
@@ -253,21 +252,23 @@ function changeDropdownText(event, text) {
     const slider2 = document.getElementById("ILCSlider2");
     const slider1 = document.getElementById("ILCSlider1");
 
-    if (text == "R.G.B. Light Configuration") {
+    if (selectedMode == "R.G.B. Light Configuration") {
         const color2 = new THREE.Color(inputB2.value);
-        matB2.emissive.set(color2);
-        if (pointLight2) { pointLight2.color.set(color2); }
         const color1 = new THREE.Color(inputB1.value);
+        matB2.emissive.set(color2);
         matB1.emissive.set(color1);
-        if (pointLight1) pointLight1.color.set(color1);
+        if (pointLight2) { pointLight2.color.set(color2); }
+        if (pointLight1) { pointLight1.color.set(color1); }
     }
-    else if (text == "Incandescent Light Configuration") {
+    else if (selectedMode == "Incandescent Light Configuration") {
         const { hex2, kelvin2 } = getKelvinColorInfo(+slider2.value);
-        const color2 = new THREE.Color(hex2);
         const { hex1, kelvin1 } = getKelvinColorInfo(+slider1.value);
+        const color2 = new THREE.Color(hex2);
         const color1 = new THREE.Color(hex1);
         matB2.emissive.set(color2);
         matB1.emissive.set(color1);
+        if (pointLight2) { pointLight2.color.set(color2); }
+        if (pointLight1) { pointLight1.color.set(color1); }
     }
 }
 
@@ -286,4 +287,11 @@ window.addEventListener('DOMContentLoaded', () => {
     if (container && getComputedStyle(container).display !== 'none') {
         initScene();
     }
+});
+
+// Attach dropdownchange event
+document.querySelector('.dropdown').addEventListener('dropdownchange', function (e) {
+    selectedMode = e.detail.value;
+    //console.log("Dropdown changed to:", selectedMode);
+    changeBulbMode();
 });
