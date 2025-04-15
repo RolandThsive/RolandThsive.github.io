@@ -182,6 +182,7 @@ function getKelvinColorInfo(value) {
 }
 
 function setupColorInputs() {
+    changeBulbMode();
     const inputB2 = document.getElementById('colorPicker2');
     const inputB1 = document.getElementById('colorPicker1');
     const intensityB2 = document.getElementById('brightnessSlider2');
