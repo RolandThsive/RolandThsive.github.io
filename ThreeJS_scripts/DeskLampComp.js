@@ -14,7 +14,7 @@ let isAnimating = false;
 let matB2 = null, pointLight2 = null;
 let matB1 = null, pointLight1 = null;
 let selectedMode = "3D Model Viewer";
-
+let lowerThres = 0.6;
 
 function initScene() {
     const container = document.getElementById('JSThreeModel');
@@ -96,7 +96,7 @@ function initScene() {
                     matB2.color = new THREE.Color(0xF5F5F5);
                     matB2.emissive = new THREE.Color(0xFF0005);
                     matB2.emissiveIntensity = 1.0;
-                    pointLight2 = new THREE.PointLight(0xFF0005, 1.5, 50, 0.7);
+                    pointLight2 = new THREE.PointLight(0xFF0005, 3.0, 50, 0.7);
                     pointLight2.position.copy(obj.position);
                     scene.add(pointLight2);
                 }
@@ -105,7 +105,7 @@ function initScene() {
                     matB1.color = new THREE.Color(0xF5F5F5);
                     matB1.emissive = new THREE.Color(0x0073cf);
                     matB1.emissiveIntensity = 1.0;
-                    pointLight1 = new THREE.PointLight(0x0073cf, 1.5, 50, 0.7);
+                    pointLight1 = new THREE.PointLight(0x0073cf, 1.95, 50, 0.7);
                     pointLight1.position.copy(obj.position);
                     scene.add(pointLight1);
                 }
@@ -211,15 +211,27 @@ function setupColorInputs() {
 
     if (intensityB2) {
         intensityB2.addEventListener('input', () => {
-            if (pointLight2) pointLight2.intensity = parseFloat(intensityB2.value);
-            if (matB2) matB2.emissiveIntensity = parseFloat(intensityB2.value);
+            if (selectedMode == "R.G.B. Light Configuration") {
+                if (pointLight2) pointLight2.intensity = parseFloat(intensityB2.value);
+                if (matB2) matB2.emissiveIntensity = parseFloat(intensityB2.value);
+            }
+            else if (selectedMode == "Incandescent Light Configuration") {
+                if (pointLight2) pointLight2.intensity = parseFloat((intensityB2.value * lowerThres));
+                if (matB2) matB2.emissiveIntensity = parseFloat((intensityB2.value * lowerThres));
+            }
         });
     }
 
     if (intensityB1) {
         intensityB1.addEventListener('input', () => {
-            if (pointLight1) pointLight1.intensity = parseFloat(intensityB1.value);
-            if (matB1) matB1.emissiveIntensity = parseFloat(intensityB1.value);
+            if (selectedMode == "R.G.B. Light Configuration") {
+                if (pointLight1) pointLight1.intensity = parseFloat(intensityB1.value);
+                if (matB1) matB1.emissiveIntensity = parseFloat(intensityB1.value);
+            }
+            else if (selectedMode == "Incandescent Light Configuration") {
+                if (pointLight1) pointLight1.intensity = parseFloat((intensityB1.value * lowerThres));
+                if (matB1) matB1.emissiveIntensity = parseFloat((intensityB1.value * lowerThres));
+            }
         });
     }
     if (slider2) {
@@ -245,6 +257,8 @@ function setupColorInputs() {
 }
 
 function changeBulbMode() {
+    const intensityB2 = document.getElementById('brightnessSlider2');
+    const intensityB1 = document.getElementById('brightnessSlider1');
 
     const inputB2 = document.getElementById('colorPicker2');
     const inputB1 = document.getElementById('colorPicker1');
@@ -269,6 +283,13 @@ function changeBulbMode() {
         matB1.emissive.set(color1);
         if (pointLight2) { pointLight2.color.set(color2); }
         if (pointLight1) { pointLight1.color.set(color1); }
+
+        //Tone down intensity
+        if (pointLight2) pointLight2.intensity = parseFloat((intensityB2.value * lowerThres));
+        if (matB2) matB2.emissiveIntensity = parseFloat((intensityB2.value * lowerThres));
+
+        if (pointLight1) pointLight1.intensity = parseFloat((intensityB1.value * lowerThres));
+        if (matB1) matB1.emissiveIntensity = parseFloat((intensityB1.value * lowerThres));
     }
 }
 
