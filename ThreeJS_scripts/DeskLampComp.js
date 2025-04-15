@@ -103,9 +103,9 @@ function initScene() {
                 if (obj.material.name === 'Mat_B1') {
                     matB1 = obj.material; // Save reference
                     matB1.color = new THREE.Color(0xF5F5F5);
-                    matB1.emissive = new THREE.Color(0x00FF00);
+                    matB1.emissive = new THREE.Color(0x0073cf);
                     matB1.emissiveIntensity = 1.0;
-                    pointLight1 = new THREE.PointLight(0x00FF00, 1.5, 50, 0.7);
+                    pointLight1 = new THREE.PointLight(0x0073cf, 1.5, 50, 0.7);
                     pointLight1.position.copy(obj.position);
                     scene.add(pointLight1);
                 }
