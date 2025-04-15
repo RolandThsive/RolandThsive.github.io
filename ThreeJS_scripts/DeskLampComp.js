@@ -235,9 +235,9 @@ function setupColorInputs() {
         });
     }
     if (slider2) {
-        slider2.addEventListener("input", () => {
+        slider2.addEventListener('input', () => {
             if (matB2) {
-                const { hex, kelvin } = getKelvinColorInfo(+slider2.value);
+                const { hex, kelvin } = getKelvinColorInfo(slider2.value);
                 const color = new THREE.Color(hex);
                 matB2.emissive.set(color);
                 if (pointLight2) pointLight2.color.set(color);
@@ -245,9 +245,9 @@ function setupColorInputs() {
         });
     }
     if (slider1) {
-        slider1.addEventListener("input", () => {
+        slider1.addEventListener('input', () => {
             if (matB1) {
-                const { hex, kelvin } = getKelvinColorInfo(+slider1.value);
+                const { hex, kelvin } = getKelvinColorInfo(slider1.value);
                 const color = new THREE.Color(hex);
                 matB1.emissive.set(color);
                 if (pointLight1) pointLight1.color.set(color);
@@ -263,10 +263,10 @@ function changeBulbMode() {
     const inputB2 = document.getElementById('colorPicker2');
     const inputB1 = document.getElementById('colorPicker1');
 
-    const slider2 = document.getElementById("ILCSlider2");
-    const slider1 = document.getElementById("ILCSlider1");
+    const slider2 = document.getElementById('ILCSlider2');
+    const slider1 = document.getElementById('ILCSlider1');
 
-    if (selectedMode == "R.G.B. Light Configuration") {
+    if (selectedMode == 'R.G.B. Light Configuration') {
         const color2 = new THREE.Color(inputB2.value);
         const color1 = new THREE.Color(inputB1.value);
         matB2.emissive.set(color2);
@@ -274,9 +274,9 @@ function changeBulbMode() {
         if (pointLight2) { pointLight2.color.set(color2); }
         if (pointLight1) { pointLight1.color.set(color1); }
     }
-    else if (selectedMode == "Incandescent Light Configuration") {
-        const { hex2, kelvin2 } = getKelvinColorInfo(+slider2.value);
-        const { hex1, kelvin1 } = getKelvinColorInfo(+slider1.value);
+    else if (selectedMode == 'Incandescent Light Configuration') {
+        const { hex2, kelvin2 } = getKelvinColorInfo(slider2.value);
+        const { hex1, kelvin1 } = getKelvinColorInfo(slider1.value);
         const color2 = new THREE.Color(hex2);
         const color1 = new THREE.Color(hex1);
         matB2.emissive.set(color2);
