@@ -1,4 +1,0 @@
-(fp_lib_table
-	(version 7)
-	(lib (name "WireToPCB_footprints") (type "KiCad") (uri "C:/Users/Rohit Tantiya/Desktop/Projects/AQI Board/Thermometer/Electronics/Libraries/WireToPCB/WireToPCB_footprints.pretty") (options "") (descr ""))
-)
