@@ -107,7 +107,7 @@
   //  3D viewer engine
   //
   //  SITE LAYOUT comes from  BASE/paths.txt  (one line per folder, key = URL):
-  //    Model = .../3D_models        Poster = .../posters
+  //    Model = .../3D_models        Poster = .../posters        PosterFormat = png | webp
   //    ModelParameters = .../ModelParameters        PCBAssets = .../PCB Assests
   //  so   Model/Name.glb   Poster/Name.png   ModelParameters/Name.txt   PCBAssets/<project>/<file>
   //
@@ -146,14 +146,14 @@
   //  editing any txt makes every visitor fetch the fresh copies instead of stale cached ones.
   // =============================================================================
   const BASE = new URL(document.currentScript.src).origin;   // the site this script is served from (paths.txt lives at its root)
-  const PARAMS_VERSION = "1";
+  const PARAMS_VERSION = "2";
 
   // folder URLs, filled from paths.txt (model, poster, modelparameters, pcbassets)
   const PATH = {};
   const REQUIRED = ["model", "poster", "modelparameters", "pcbassets"];
   const url = (folder, file) => encodeURI(`${PATH[folder]}/${file}`);
   const modelUrl  = (name, ext = ".glb") => url("model", `${name}${ext}`);
-  const posterUrl = (name) => url("poster", `${name}.png`);
+  const posterUrl = (name) => url("poster", `${name}.${PATH.posterformat || "png"}`);   // PosterFormat in paths.txt (png / webp / jpg)
   const paramsUrl = (name) => url("modelparameters", `${name}.txt`) + `?v=${PARAMS_VERSION}`;
   const kicadUrl  = (folder, file) => url("pcbassets", `${folder}/${file}`);
 
@@ -164,7 +164,7 @@
       const res = await fetch(src);
       if (!res.ok) return `${src} answered ${res.status}`;
       Object.entries(parseParams(await res.text())).forEach(([k, v]) => {
-        PATH[k.replace(/[^a-z]/g, "")] = v.replace(/\/+$/, "");   // "PCB Assets" / "pcb-assets" -> pcbassets
+        PATH[k.replace(/[^a-z]/g, "")] = v.replace(/\/+$/, "").replace(/^\./, "");   // "PCB Assets" / "pcb-assets" -> pcbassets; ".webp" -> webp
       });
     } catch (e) { return `${src} could not be read (${e.message})`; }
     const missing = REQUIRED.filter((k) => !PATH[k]);

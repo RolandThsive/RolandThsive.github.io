@@ -10,8 +10,10 @@
 # .glb models                      ->  Model/<Name>.glb
 Model = https://RolandThsive.github.io/3D_models
 
-# poster / thumbnail images        ->  Poster/<Name>.png
+# poster / thumbnail images        ->  Poster/<Name>.<PosterFormat>
 Poster = https://RolandThsive.github.io/posters
+# file extension of the posters: png or webp (change this when the folder is converted)
+PosterFormat = webp
 
 # per-model parameter files        ->  ModelParameters/<Name>.txt
 ModelParameters = https://RolandThsive.github.io/ModelParameters
