@@ -8,15 +8,15 @@
 #  Spaces in folder names are fine (they are encoded automatically).
 
 # .glb models                      ->  Model/<Name>.glb
-Model = https://RolandThsive.github.io/3D_models
+Model = https://RolandThsive.github.io/3D_Assets/3D_models
 
 # poster / thumbnail images        ->  Poster/<Name>.<PosterFormat>
-Poster = https://RolandThsive.github.io/posters
+Poster = https://RolandThsive.github.io/3D_Assets/Posters
 # file extension of the posters: png or webp (change this when the folder is converted)
 PosterFormat = webp
 
 # per-model parameter files        ->  ModelParameters/<Name>.txt
-ModelParameters = https://RolandThsive.github.io/ModelParameters
+ModelParameters = https://RolandThsive.github.io/3D_Assets/ModelParameters
 
 # KiCad projects, one sub-folder each  ->  PCBAssets/<Project folder>/<file>
-PCBAssets = https://RolandThsive.github.io/PCB Assests
+PCBAssets = https://RolandThsive.github.io/PCB_Assets
