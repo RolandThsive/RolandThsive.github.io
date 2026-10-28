@@ -1,0 +1,100 @@
+# ============================================================
+#  TEMPLATE  -  model parameter file
+#  https://RolandThsive.github.io/ModelParameters/TEMPLATE.txt
+# ============================================================
+#
+#  HOW IT WORKS
+#  For a model at   .../3D_models/Name.glb
+#  the page reads   .../ModelParameters/Name.txt
+#  So: copy this file, rename it to match the .glb, fill it in.
+#  No file for a model = the viewer keeps its HTML defaults.
+#
+#  FORMAT
+#  One "key = value" per line. Keys are model-viewer attribute names.
+#  none            -> not set (the post's HTML default is kept)
+#  true / false    -> add / remove an on-off flag (autoplay, ar, camera-controls...)
+#  Lines starting with # are ignored. The real files don't need any comments.
+#
+#  This file overrides the viewer's HTML, including loading / reveal.
+#  Only src and poster are not here: the slide buttons define those.
+#
+#  LOADING
+#  loading:  lazy (default, waits) | eager (download immediately)
+#  reveal:   manual (default, shows the "Load 3D Model" button) | auto | interaction
+#
+#  EXAMPLES
+#  camera-orbit = 169.6deg 101.2deg 0.2632m
+#  field-of-view = 30deg
+#  min-camera-orbit = auto auto 0.15m
+#  tone-mapping = neutral
+#  ar-modes = webxr scene-viewer quick-look
+# ------------------------------------------------------------
+
+# ---------- Loading ----------
+loading = none
+reveal = none
+
+# ---------- Camera ----------
+camera-orbit = none
+camera-target = none
+field-of-view = none
+min-camera-orbit = none
+max-camera-orbit = none
+min-field-of-view = none
+max-field-of-view = none
+interpolation-decay = none
+
+# ---------- Interaction ----------
+camera-controls = none
+disable-pan = none
+disable-tap = none
+disable-zoom = none
+orbit-sensitivity = none
+zoom-sensitivity = none
+pan-sensitivity = none
+touch-action = none
+interaction-prompt = none
+interaction-prompt-style = none
+interaction-prompt-threshold = none
+
+# ---------- Idle spin ----------
+auto-rotate = none
+auto-rotate-delay = none
+rotation-per-second = none
+
+# ---------- Lighting & environment ----------
+exposure = none
+tone-mapping = none
+shadow-intensity = none
+shadow-softness = none
+environment-image = none
+skybox-image = none
+skybox-height = none
+
+# ---------- Animation ----------
+#  animations: 2+ entries build an "Animations" dropdown for this model.
+#              Format  Label: ClipName; Label: ClipName   (clip names as exported in the glb)
+autoplay = none
+animation-name = none
+animation-crossfade-duration = none
+animations = none
+
+# ---------- Scene graph ----------
+variant-name = none
+orientation = none
+scale = none
+
+# ---------- AR ----------
+ar = none
+ar-modes = none
+ar-scale = none
+ar-placement = none
+ios-src = none
+xr-environment = none
+
+# ---------- Misc ----------
+alt = none
+a11y = none
+bounds = none
+with-credentials = none
+generate-schema = none

@@ -32,6 +32,7 @@ skybox-height = none
 autoplay = none
 animation-name = none
 animation-crossfade-duration = none
+animations = none
 variant-name = none
 orientation = none
 scale = none
