@@ -187,9 +187,11 @@
   // libraries (loaded from CDN on demand; KiCanvas only when a KiCad viewer is actually opened)
   const MODEL_VIEWER_URL = "https://unpkg.com/@google/model-viewer@4.4.0/dist/model-viewer.min.js";
   const KICANVAS_URL = "https://kicanvas.org/kicanvas/kicanvas.js";
-  import(MODEL_VIEWER_URL);
-  let kicanvasLoaded = null;
+  let modelViewerLoaded = null, kicanvasLoaded = null;
+  const loadModelViewer = () => (modelViewerLoaded ||= import(MODEL_VIEWER_URL));
   const loadKicanvas = () => (kicanvasLoaded ||= import(KICANVAS_URL));
+  // pages that only use the mvEngine API (no model-set) load model-viewer themselves, on demand
+  if (document.querySelector(".model-set")) loadModelViewer();
 
   const LOAD_ICON = '<svg viewBox="0 0 24 24"><path d="M12 3v12M6 9l6 6 6-6M4 21h16"/></svg>';
   const CAPTION_STYLE = "font-family: Shadows Into Light; font-weight: normal;";
@@ -403,9 +405,18 @@
     if (anchor) anchor.after(el);
   });
 
+  // ---------- public API for pages with their own viewer UI (e.g. the Circuits page) ----------
+  const pathsReady = loadPaths();
+  window.mvEngine = {
+    ready: pathsReady.then((err) => { if (err) throw new Error(err); return PATH; }),   // resolves to the folder URLs
+    modelUrl, posterUrl, paramsUrl, fetchParams, applyParams, loadModelViewer, loadKicanvas,
+    libraries: { modelViewer: MODEL_VIEWER_URL, kicanvas: KICANVAS_URL }
+  };
+
   // ---------- go ----------
   const go = async () => {
-  const pathsError = await loadPaths();
+  if (document.querySelector(".model-set")) loadModelViewer();
+  const pathsError = await pathsReady;
   if (pathsError) {
     console.error("3D viewers not built:", pathsError);
     document.querySelectorAll(".model-set, .kicad-set").forEach((set) => {
