@@ -32,7 +32,6 @@ skybox-height = none
 autoplay = true
 animation-name = Axis 3
 animation-crossfade-duration = 300
-animations = Axis 1: Axis 1; Axis 2: Axis 2; Axis 3 - Servo: Axis 3; Axis 1 & 2: General Movement
 variant-name = none
 orientation = none
 scale = none

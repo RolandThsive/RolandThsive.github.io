@@ -72,12 +72,9 @@ skybox-image = none
 skybox-height = none
 
 # ---------- Animation ----------
-#  animations: 2+ entries build an "Animations" dropdown for this model.
-#              Format  Label: ClipName; Label: ClipName   (clip names as exported in the glb)
 autoplay = none
 animation-name = none
 animation-crossfade-duration = none
-animations = none
 
 # ---------- Scene graph ----------
 variant-name = none

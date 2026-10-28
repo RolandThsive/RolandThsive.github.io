@@ -32,7 +32,6 @@ skybox-height = none
 autoplay = none
 animation-name = none
 animation-crossfade-duration = none
-animations = Tick 1: Animation1; Tick 2: Animation2
 variant-name = none
 orientation = none
 scale = none
