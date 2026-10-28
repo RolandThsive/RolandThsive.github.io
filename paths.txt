@@ -1,0 +1,20 @@
+# ============================================================
+#  paths.txt  -  where things live on this site
+#  Lives at the root:  https://RolandThsive.github.io/paths.txt
+#  Every post reads this first, so moving or renaming a folder
+#  is a one-line change here and no post needs editing.
+# ============================================================
+#  key = full URL of the folder, no trailing slash.
+#  Spaces in folder names are fine (they are encoded automatically).
+
+# .glb models                      ->  Model/<Name>.glb
+Model = https://RolandThsive.github.io/3D_models
+
+# poster / thumbnail images        ->  Poster/<Name>.png
+Poster = https://RolandThsive.github.io/posters
+
+# per-model parameter files        ->  ModelParameters/<Name>.txt
+ModelParameters = https://RolandThsive.github.io/ModelParameters
+
+# KiCad projects, one sub-folder each  ->  PCBAssets/<Project folder>/<file>
+PCBAssets = https://RolandThsive.github.io/PCB Assests
