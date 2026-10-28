@@ -266,10 +266,16 @@
     const params = await fetchParams(name);
     if (!("alt" in params)) params.alt = `3D model - ${label}`;
     applyParams(viewer, params);
+    const loaded = viewer.dataset.loaded === "1";
+    // Switching models on a viewer that is already showing one: model-viewer would keep rendering the
+    // old model until the new one arrives (which looks frozen), so show the new poster right away...
+    if (loaded && typeof viewer.showPoster === "function") viewer.showPoster();
     viewer.setAttribute("src", modelUrl(name, ext));   // with reveal=manual nothing downloads until Load is pressed
-    // reveal=manual re-shows the poster on every src change and waits for dismissPoster() again;
-    // once the visitor has pressed Load for this viewer, later slide changes dismiss it automatically
-    if (viewer.dataset.loaded === "1") customElements.whenDefined("model-viewer").then(() => viewer.dismissPoster());
+    // ...and, once the src change has been committed, ask for the poster to go as soon as the model is in.
+    if (loaded) customElements.whenDefined("model-viewer").then(async () => {
+      if (viewer.updateComplete) await viewer.updateComplete;
+      viewer.dismissPoster();
+    });
   };
 
   // ---------- build every <div class="model-set"> ----------
