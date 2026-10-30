@@ -86,7 +86,15 @@ function initScene() {
     const loader = new GLTFLoader();
     loader.setDRACOLoader(dracoLoader);
 
-    loader.load('https://RolandThsive.github.io/3D_models/DeskLampComp.glb', (gltf) => {
+    // the model's address comes from paths.txt through the post's 3D engine (falls back to the current folder)
+    const LAMP_FALLBACK = 'https://RolandThsive.github.io/3D_Assets/3D_models/DeskLampComp.glb';
+    const lampUrl = window.mvEngine
+        ? window.mvEngine.ready.then(() => window.mvEngine.modelUrl('DeskLampComp'), () => LAMP_FALLBACK)
+        : Promise.resolve(LAMP_FALLBACK);
+    const loadModel = loader.load.bind(loader);
+    loader.load = (url, ...rest) => lampUrl.then((u) => loadModel(u, ...rest));
+
+    loader.load('DeskLampComp', (gltf) => {
         const model = gltf.scene;
         scene.add(model);
         model.traverse((obj) => {
