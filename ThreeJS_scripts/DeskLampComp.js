@@ -1,13 +1,27 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/loaders/DRACOLoader.js';
-import { LightProbeGenerator } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/lights/LightProbeGenerator.js';
-import { LightProbeHelper } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/helpers/LightProbeHelper.js';
-import { RoomEnvironment } from 'https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/environments/RoomEnvironment.js';
+// Speed: three.js and its add-ons are NOT downloaded when the post opens. They are fetched the first time a
+// visitor picks a light mode (R.G.B. or Incandescent), so the post loads as fast as the plain 3D viewer.
+const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.175.0/';
+let THREE, GLTFLoader, OrbitControls, EffectComposer, RenderPass, UnrealBloomPass, DRACOLoader, LightProbeGenerator, LightProbeHelper, RoomEnvironment;
+let libsLoading = null;
+function loadLibs() {
+    return libsLoading || (libsLoading = Promise.all([
+        import(THREE_URL + 'build/three.module.js'),
+        import(THREE_URL + 'examples/jsm/loaders/GLTFLoader.js'),
+        import(THREE_URL + 'examples/jsm/controls/OrbitControls.js'),
+        import(THREE_URL + 'examples/jsm/postprocessing/EffectComposer.js'),
+        import(THREE_URL + 'examples/jsm/postprocessing/RenderPass.js'),
+        import(THREE_URL + 'examples/jsm/postprocessing/UnrealBloomPass.js'),
+        import(THREE_URL + 'examples/jsm/loaders/DRACOLoader.js'),
+        import(THREE_URL + 'examples/jsm/lights/LightProbeGenerator.js'),
+        import(THREE_URL + 'examples/jsm/helpers/LightProbeHelper.js'),
+        import(THREE_URL + 'examples/jsm/environments/RoomEnvironment.js')
+    ]).then((m) => {
+        THREE = m[0];
+        ({ GLTFLoader } = m[1]); ({ OrbitControls } = m[2]); ({ EffectComposer } = m[3]); ({ RenderPass } = m[4]);
+        ({ UnrealBloomPass } = m[5]); ({ DRACOLoader } = m[6]); ({ LightProbeGenerator } = m[7]);
+        ({ LightProbeHelper } = m[8]); ({ RoomEnvironment } = m[9]);
+    }));
+}
 
 let camera, scene, renderer, composer, controls;
 let isAnimating = false;
@@ -143,6 +157,8 @@ function initScene() {
 function animate() {
     if (!isAnimating) return;
     requestAnimationFrame(animate);
+    const box = document.getElementById('JSThreeModel');
+    if (!box || box.offsetParent === null) return;   // hidden: skip drawing, saves the graphics card
     controls.update();
     renderer.render(scene, camera);
     composer.render();
@@ -266,6 +282,7 @@ function setupColorInputs() {
 }
 
 function changeBulbMode() {
+    if (!THREE) return;
     const intensityB2 = document.getElementById('brightnessSlider2');
     const intensityB1 = document.getElementById('brightnessSlider1');
 
@@ -302,26 +319,18 @@ function changeBulbMode() {
     }
 }
 
-// Trigger when visible
-const observer = new MutationObserver(() => {
+// Start the light simulation the first time a light mode is picked.
+// (The post's own click handler shows the container right after this event, so wait one frame.)
+const isLightMode = (m) => m === 'R.G.B. Light Configuration' || m === 'Incandescent Light Configuration';
+function startWhenVisible() {
     const container = document.getElementById('JSThreeModel');
-    if (container && getComputedStyle(container).display !== 'none') {
-        initScene();
-    }
-});
-observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+    if (!container || getComputedStyle(container).display === 'none') return;
+    loadLibs().then(() => { initScene(); changeBulbMode(); }).catch((err) => console.error('Flower Lamp light simulation:', err));
+}
 
-// Also manually call once on load
-window.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('JSThreeModel');
-    if (container && getComputedStyle(container).display !== 'none') {
-        initScene();
-    }
-});
-
-// Attach dropdownchange event
-document.querySelector('.dropdown').addEventListener('dropdownchange', function (e) {
+const dropdown = document.querySelector('.dropdown');
+if (dropdown) dropdown.addEventListener('dropdownchange', function (e) {
     selectedMode = e.detail.value;
-    //console.log("Dropdown changed to:", selectedMode);
-    changeBulbMode();
+    if (isLightMode(selectedMode)) requestAnimationFrame(() => setTimeout(startWhenVisible, 0));
+    else changeBulbMode();
 });
