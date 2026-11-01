@@ -20,3 +20,6 @@ ModelParameters = https://RolandThsive.github.io/3D_Assets/ModelParameters
 
 # KiCad projects, one sub-folder each  ->  PCBAssets/<Project folder>/<file>
 PCBAssets = https://RolandThsive.github.io/PCB_Assets
+
+# featuredImages  ->  FeaturedImages/<file>
+FeaturedImages = https://RolandThsive.github.io/FeaturedImages
