@@ -21,5 +21,11 @@ ModelParameters = https://RolandThsive.github.io/3D_Assets/ModelParameters
 # KiCad projects, one sub-folder each  ->  PCBAssets/<Project folder>/<file>
 PCBAssets = https://RolandThsive.github.io/PCB_Assets
 
-# featuredImages  ->  FeaturedImages/<file>
+# share pictures (link previews)   ->  FeaturedImages/<postId>.jpg   (home.jpg for the home page)
+#   used by the Songs page and the health check; the theme's head has its own copy of this address,
+#   because Blogger builds the head on its server and cannot read this file
 FeaturedImages = https://RolandThsive.github.io/FeaturedImages
+
+# world map, already drawn (one file per country + two whole-world files) ->  WorldMap/world-light.svg,
+#   WorldMap/world-detailed.svg, WorldMap/countries/<Country>.svg   (the footer map and its pop-up)
+WorldMap = https://RolandThsive.github.io/worldmap

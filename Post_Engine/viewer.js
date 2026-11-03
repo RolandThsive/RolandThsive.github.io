@@ -184,12 +184,18 @@
     "ar", "ar-modes", "ar-scale", "ar-placement", "ios-src", "xr-environment",
     "alt", "a11y", "bounds", "with-credentials", "generate-schema"
   ];
-  // libraries (loaded from CDN on demand; KiCanvas only when a KiCad viewer is actually opened)
+  // libraries, loaded on demand: model-viewer from the CDN, the KiCad viewer from our own GitHub Pages
+  // (Web-Circuit-Viewer, https://github.com/RolandThsive/Web-Circuit-Viewer; only fetched when a Load button is pressed)
   const MODEL_VIEWER_URL = "https://unpkg.com/@google/model-viewer@4.4.0/dist/model-viewer.min.js";
-  const KICANVAS_URL = "https://kicanvas.org/kicanvas/kicanvas.js";
-  let modelViewerLoaded = null, kicanvasLoaded = null;
+  const CIRCUIT_VIEWER_URL = "https://RolandThsive.github.io/Web-Circuit-Viewer/web-circuit-viewer.js";
+  let modelViewerLoaded = null, circuitViewerLoaded = null;
   const loadModelViewer = () => (modelViewerLoaded ||= import(MODEL_VIEWER_URL));
-  const loadKicanvas = () => (kicanvasLoaded ||= import(KICANVAS_URL));
+  const loadCircuitViewer = () => (circuitViewerLoaded ||= (window.WebCircuitViewer ? Promise.resolve() : new Promise((ok, fail) => {
+    const s = document.createElement("script");
+    s.src = CIRCUIT_VIEWER_URL; s.onload = ok; s.onerror = () => { circuitViewerLoaded = null; fail(new Error("viewer script")); };
+    document.head.appendChild(s);
+  })));
+  const loadKicanvas = loadCircuitViewer;                     // old name, kept for pages that still call it
   // pages that only use the mvEngine API (no model-set) load model-viewer themselves, on demand
   if (document.querySelector(".model-set")) loadModelViewer();
 
@@ -339,18 +345,23 @@
     showModel(set, 0);
   });
 
-  // ---------- KiCanvas (schematic / PCB) ----------
-  // KiCanvas has no lazy mode, so the embed is only created when its Load button is pressed,
-  // and rebuilt when a slide changes the file (KiCanvas does not re-read a changed source).
+  // ---------- KiCad viewer (schematic / PCB) ----------
+  // The viewer script is only fetched when its Load button is pressed; a <web-circuit-viewer> element is then
+  // placed in the wrap, and a slide change just points it at another file.
   const buildKicanvas = (wrap, fileUrl) => {
-    const oldEmbed = wrap.querySelector("kicanvas-embed");
-    const embed = document.createElement("kicanvas-embed");
-    embed.setAttribute("controls", "full");
-    embed.setAttribute("controlslist", "nodownload");
-    const source = document.createElement("kicanvas-source");
-    source.setAttribute("src", fileUrl);
-    embed.appendChild(source);
-    if (oldEmbed) oldEmbed.replaceWith(embed); else wrap.appendChild(embed);
+    const old = wrap.querySelector("web-circuit-viewer");
+    if (old) { old.setAttribute("src", fileUrl); return; }
+    loadCircuitViewer().then(() => {
+      if (wrap.querySelector("web-circuit-viewer")) return;
+      const el = document.createElement("web-circuit-viewer");
+      el.setAttribute("src", fileUrl);
+      wrap.appendChild(el);
+    }).catch(() => {
+      const note = document.createElement("div");
+      note.className = "kc-fail";
+      note.textContent = "The viewer could not be loaded. Please try again later.";
+      wrap.appendChild(note);
+    });
   };
 
   const buildKicadSets = () => document.querySelectorAll(".kicad-set").forEach((set, n) => {
@@ -383,8 +394,7 @@
 
     set.querySelector(".mv-load-btn").addEventListener("click", (ev) => {
       ev.stopPropagation();
-      loadKicanvas();                                    // the KiCanvas library is only fetched now
-      buildKicanvas(wrap, current);
+      buildKicanvas(wrap, current);                      // the viewer script is only fetched now
       wrap.querySelector(".mv-poster").remove();
     });
     set.querySelectorAll(".slide").forEach((btn, i) => btn.addEventListener("click", () => {
@@ -409,8 +419,8 @@
   const pathsReady = loadPaths();
   window.mvEngine = {
     ready: pathsReady.then((err) => { if (err) throw new Error(err); return PATH; }),   // resolves to the folder URLs
-    modelUrl, posterUrl, paramsUrl, fetchParams, applyParams, loadModelViewer, loadKicanvas,
-    libraries: { modelViewer: MODEL_VIEWER_URL, kicanvas: KICANVAS_URL }
+    modelUrl, posterUrl, paramsUrl, fetchParams, applyParams, loadModelViewer, loadCircuitViewer, loadKicanvas,
+    libraries: { modelViewer: MODEL_VIEWER_URL, circuitViewer: CIRCUIT_VIEWER_URL }
   };
 
   // ---------- go ----------
