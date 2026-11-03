@@ -1,8 +1,8 @@
 /* =============================================================================
    3D viewer engine for ro-h-bots posts.  Include in a post with:
 
-     <link rel="stylesheet" href="https://RolandThsive.github.io/engine/viewer.css">
-     <script src="https://RolandThsive.github.io/engine/viewer.js"></script>
+     <link rel="stylesheet" href="https://RolandThsive.github.io/Post_Engine/viewer.css">
+     <script src="https://RolandThsive.github.io/Post_Engine/viewer.js"></script>
 
    Everything below used to live inline in each post. One copy here means a fix
    reaches every post at once. Site folders come from /paths.txt on this site.

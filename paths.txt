@@ -7,25 +7,47 @@
 #  key = full URL of the folder, no trailing slash.
 #  Spaces in folder names are fine (they are encoded automatically).
 
+# the post engine (3D and circuit viewers)   ->  Engine/viewer.js, Engine/viewer.css
+#   this one address is the only one a post or page has to carry; the engine reads this file
+#   for everything else. The health check uses it to find posts that load the engine from
+#   an old address.
+Engine = https://RolandThsive.github.io/Post_Engine
+
 # .glb models                      ->  Model/<Name>.glb
-Model = https://RolandThsive.github.io/3D_Assets/3D_models
+Model = https://RolandThsive.github.io/Assets/3D_Assets/3D_models
 
 # poster / thumbnail images        ->  Poster/<Name>.<PosterFormat>
-Poster = https://RolandThsive.github.io/3D_Assets/Posters
+Poster = https://RolandThsive.github.io/Assets/3D_Assets/Posters
 # file extension of the posters: png or webp (change this when the folder is converted)
 PosterFormat = webp
 
 # per-model parameter files        ->  ModelParameters/<Name>.txt
-ModelParameters = https://RolandThsive.github.io/3D_Assets/ModelParameters
+ModelParameters = https://RolandThsive.github.io/Assets/3D_Assets/ModelParameters
 
 # KiCad projects, one sub-folder each  ->  PCBAssets/<Project folder>/<file>
-PCBAssets = https://RolandThsive.github.io/PCB_Assets
+PCBAssets = https://RolandThsive.github.io/Assets/PCB_Assets
 
 # share pictures (link previews)   ->  FeaturedImages/<postId>.jpg   (home.jpg for the home page)
 #   used by the Songs page and the health check; the theme's head has its own copy of this address,
 #   because Blogger builds the head on its server and cannot read this file
-FeaturedImages = https://RolandThsive.github.io/FeaturedImages
+FeaturedImages = https://RolandThsive.github.io/Assets/PagesAndPosts_Assets/FeaturedImages
 
 # world map, already drawn (one file per country + two whole-world files) ->  WorldMap/world-light.svg,
 #   WorldMap/world-detailed.svg, WorldMap/countries/<Country>.svg   (the footer map and its pop-up)
-WorldMap = https://RolandThsive.github.io/worldmap
+WorldMap = https://RolandThsive.github.io/Assets/PagesAndPosts_Assets/WorldMap
+
+# the 404 page's animations        ->  ErrorPage/<name>.gif
+#   (the 404 page carries these addresses itself, like posts carry the engine's: it has to show
+#   something before anything else is read)
+ErrorPage = https://RolandThsive.github.io/Assets/PagesAndPosts_Assets/404_Page
+
+# icons                            ->  Icons/zodiac-icons/<animal>.svg|png, Icons/zodiac-REDGOLD-icons/<Animal>_REDGOLD.svg|png
+#   (the Timeline page has its own copy of the red-gold zodiac drawings built in, so these are not loaded yet)
+Icons = https://RolandThsive.github.io/Assets/PagesAndPosts_Assets/Icons
+
+# the pictures used in posts, one folder per post   ->  PostImages/<Post title>/<file>
+#   a safe copy: the posts themselves show the copies Blogger made when they were uploaded
+PostImages = https://RolandThsive.github.io/Assets/PagesAndPosts_Assets/Post_images
+
+# scripts posts use besides the engine   ->  Scripts/<name>.js   (the Flower Lamp's own viewer, DeskLampComp.js)
+Scripts = https://RolandThsive.github.io/Assets/ThreeJS_scripts

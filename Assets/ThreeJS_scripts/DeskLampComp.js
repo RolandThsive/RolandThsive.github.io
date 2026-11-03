@@ -101,7 +101,7 @@ function initScene() {
     loader.setDRACOLoader(dracoLoader);
 
     // the model's address comes from paths.txt through the post's 3D engine (falls back to the current folder)
-    const LAMP_FALLBACK = 'https://RolandThsive.github.io/3D_Assets/3D_models/DeskLampComp.glb';
+    const LAMP_FALLBACK = 'https://RolandThsive.github.io/Assets/3D_Assets/3D_models/DeskLampComp.glb';
     const lampUrl = window.mvEngine
         ? window.mvEngine.ready.then(() => window.mvEngine.modelUrl('DeskLampComp'), () => LAMP_FALLBACK)
         : Promise.resolve(LAMP_FALLBACK);
