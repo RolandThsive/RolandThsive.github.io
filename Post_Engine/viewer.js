@@ -349,11 +349,14 @@
   // The viewer script is only fetched when its Load button is pressed; a <web-circuit-viewer> element is then
   // placed in the wrap, and a slide change just points it at another file.
   const buildKicanvas = (wrap, fileUrl) => {
+    const bg = /\.kicad_sch(\?|#|$)/i.test(fileUrl) ? "#f5f4ef" : "#001023";   // the viewer's own colours: no jump from the poster
+    wrap.style.background = bg;
     const old = wrap.querySelector("web-circuit-viewer");
-    if (old) { old.setAttribute("src", fileUrl); return; }
+    if (old) { old.style.background = bg; old.setAttribute("src", fileUrl); return; }
     loadCircuitViewer().then(() => {
       if (wrap.querySelector("web-circuit-viewer")) return;
       const el = document.createElement("web-circuit-viewer");
+      el.style.background = bg;
       el.setAttribute("src", fileUrl);
       wrap.appendChild(el);
     }).catch(() => {
