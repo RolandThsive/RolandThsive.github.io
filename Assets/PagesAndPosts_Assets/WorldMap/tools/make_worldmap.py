@@ -1,7 +1,8 @@
 """Makes the blog's world map files from Natural Earth outlines (public domain).
 
 Input : world-atlas countries-110m.json and countries-50m.json (npm package "world-atlas" 2.0.2,
-        which is Natural Earth data) + extra_shapes.json (Aksai Chin, Shaksam Valley, lon/lat).
+        which is Natural Earth data) + extra_shapes.json (Aksai Chin, Shaksam Valley, Arunachal Pradesh, lon/lat)
+        + split_shapes.json (places taken out of a country: Tibet out of China).
 Output: ../world-light.svg     footer map   (110m outlines + a dot for every place too small for them)
         ../world-detailed.svg  pop-up map   (50m outlines, wiggles under ~2 km smoothed away)
         ../countries/<Name>.svg one file per country (50m, full detail), for your collection
@@ -148,6 +149,40 @@ def extra_places():
     return [{"name": names.get(k, k), "raw": [[pts]]} for k, pts in d.items()]
 
 
+def split_out(places):
+    """split_shapes.json: places taken out of a country (Tibet out of China). The new place is the outline cut
+    to the country's own border (so the coast and the borders with the neighbours stay the same), and the
+    country keeps the rest."""
+    try:
+        from shapely.geometry import Polygon
+        from shapely.ops import unary_union
+    except ImportError:
+        print("shapely not installed: split_shapes.json is not used (pip install shapely)")
+        return places
+    d = json.load(open(os.path.join(HERE, "split_shapes.json")))
+    def geom(raw):
+        gs = []
+        for rings in raw:
+            g = Polygon(rings[0], rings[1:])
+            gs.append(g if g.is_valid else g.buffer(0))
+        return unary_union(gs)
+    def raw_of(g):
+        gs = [g] if g.geom_type == "Polygon" else [q for q in getattr(g, "geoms", []) if q.geom_type == "Polygon"]
+        return [[list(q.exterior.coords)] + [list(r.coords) for r in q.interiors] for q in gs if q.area > 1e-4]
+    by = {p["name"]: p for p in places}
+    for country, news in d.items():
+        if country.startswith("_") or country not in by:
+            continue
+        cg = geom(by[country]["raw"])
+        for name, ring in news.items():
+            ng = Polygon(ring).buffer(0).intersection(cg)
+            places.append({"name": name, "raw": raw_of(ng)})
+            cg = cg.difference(ng.buffer(1e-6))
+            print("split", name, "out of", country)
+        by[country]["raw"] = raw_of(cg)
+    return places
+
+
 def cut_groups(places):
     """A group's members and extra shapes win over their neighbours: the world map draws Aksai Chin and
     Shaksam Valley inside China, so China gets them cut out. Without this China lies underneath India's
@@ -258,9 +293,9 @@ def safe_name(s):
 
 def main():
     extra = extra_places()
-    light = cut_groups(load(os.path.join(SRC, "countries-110m.json")) + extra_places())
+    light = cut_groups(split_out(load(os.path.join(SRC, "countries-110m.json"))) + extra_places())
     light = [p for p in light if p["name"] not in {e["name"] for e in extra}]   # the extras are added back below
-    detail = cut_groups(load(os.path.join(SRC, "countries-50m.json")) + extra)
+    detail = cut_groups(split_out(load(os.path.join(SRC, "countries-50m.json"))) + extra)
     detail = [p for p in detail if p["name"] not in {e["name"] for e in extra}]
     os.makedirs(os.path.join(OUT, "countries"), exist_ok=True)
 
