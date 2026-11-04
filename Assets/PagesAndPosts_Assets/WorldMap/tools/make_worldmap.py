@@ -148,6 +148,37 @@ def extra_places():
     return [{"name": names.get(k, k), "raw": [[pts]]} for k, pts in d.items()]
 
 
+def cut_groups(places):
+    """A group's members and extra shapes win over their neighbours: the world map draws Aksai Chin and
+    Shaksam Valley inside China, so China gets them cut out. Without this China lies underneath India's
+    top, and shows through when India is dimmed or hovered (the top of India seems to vanish)."""
+    try:
+        from shapely.geometry import Polygon, MultiPolygon
+        from shapely.ops import unary_union
+    except ImportError:
+        print("shapely not installed: groups are not cut out of their neighbours (pip install shapely)")
+        return places
+    def geom(p):
+        gs = []
+        for rings in p["raw"]:
+            g = Polygon(rings[0], rings[1:])
+            gs.append(g if g.is_valid else g.buffer(0))
+        return unary_union(gs)
+    for head, members in GROUPS.items():
+        grp = unary_union([geom(p) for p in places if p["name"] in members]).buffer(1e-6)
+        for p in places:
+            if p["name"] in members:
+                continue
+            g = geom(p)
+            if not g.intersects(grp) or g.intersection(grp).area < 1e-3:   # a shared border is not an overlap
+                continue
+            d = g.difference(grp)
+            d = [d] if d.geom_type == "Polygon" else [q for q in getattr(d, "geoms", []) if q.geom_type == "Polygon"]
+            p["raw"] = [[list(q.exterior.coords)] + [list(r.coords) for r in q.interiors] for q in d if q.area > 1e-6]
+            print("cut", head, "out of", p["name"])
+    return places
+
+
 def box(pts):
     xs = [p[0] for p in pts]; ys = [p[1] for p in pts]
     return [min(xs), min(ys), max(xs), max(ys)]
@@ -226,9 +257,11 @@ def safe_name(s):
 
 
 def main():
-    light = load(os.path.join(SRC, "countries-110m.json"))
-    detail = load(os.path.join(SRC, "countries-50m.json"))
     extra = extra_places()
+    light = cut_groups(load(os.path.join(SRC, "countries-110m.json")) + extra_places())
+    light = [p for p in light if p["name"] not in {e["name"] for e in extra}]   # the extras are added back below
+    detail = cut_groups(load(os.path.join(SRC, "countries-50m.json")) + extra)
+    detail = [p for p in detail if p["name"] not in {e["name"] for e in extra}]
     os.makedirs(os.path.join(OUT, "countries"), exist_ok=True)
 
     # ---- detailed (pop-up): 50m, 2 decimals, wiggles under 0.03 units (~2 km) smoothed
